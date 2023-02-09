@@ -10,6 +10,7 @@ import (
 	"net/netip"
 	"proxy-node2more/cdn"
 	"proxy-node2more/config"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -220,6 +221,23 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	} else if strings.HasPrefix(sampleNode, vlessPre) || strings.HasPrefix(sampleNode, trojanPre) {
 		//vless:  vless://9bc0eacc-68f3-4562-15bedad6f6ef@a.b.c:539?type=tcp&security=tls&sni=b.a.tk&flow=xtls-rprx-direct#abc-vless-1
 		//trojan  trojan://aNbwlRsdsasdasr8N@a.b.tk:48857?type=tcp&security=tls&sni=a.b.tk&flow=xtls-rprx-direct#a.b.tk-trojan-2
+		re := regexp.MustCompile(`@(.*?):`)
+		nodeHost := re.FindStringSubmatch(sampleNode)[1]
+
+		if strings.Index(sampleNode, "host=") != -1 {
+			re = regexp.MustCompile(`(host=)(.*?)(&)`)
+			sampleNode = re.ReplaceAllString(sampleNode, "$1"+nodeHost+"$3")
+		} else {
+			re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+			sampleNode = re.ReplaceAllString(sampleNode, "$1$2$3$4$5host="+nodeHost+"&")
+		}
+
+		for _, ip := range ipResult {
+			re = regexp.MustCompile(`(@)(.*?)(:)`)
+			nodes = append(nodes, re.ReplaceAllString(sampleNode, "$1"+ip+"$3")+"\n")
+		}
+		configSet.OutPutNodeList = nodes
+		return configSet, nil
 
 	}
 

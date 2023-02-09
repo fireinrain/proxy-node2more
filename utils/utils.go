@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"net/netip"
@@ -91,4 +92,11 @@ func CIDR2IPS(cidr string) ([]netip.Addr, error) {
 	}
 
 	return ips[1 : len(ips)-1], nil
+}
+
+func HandleError(err error) {
+	if err != nil {
+		fmt.Println("处理出现错误: ", err.Error())
+		panic(err)
+	}
 }

@@ -193,7 +193,6 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	//将cdn ip替换到输入的节点
 
 	var nodes = []string{}
-	println(nodes)
 	//vmess节点处理
 	if strings.HasPrefix(sampleNode, vmessPre) {
 		vmessStr, err := atob(strings.Replace(sampleNode, vmessPre, "", 1))

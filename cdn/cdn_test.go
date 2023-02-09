@@ -4,15 +4,15 @@ import "testing"
 
 func TestFetchCloudflare(t *testing.T) {
 	fetcher := CdnFetcher{}
-	fetcher.fetchCloudFlare()
+	fetcher.FetchCloudFlare()
 }
 
 func TestFetchGcore(t *testing.T) {
 	fetcher := CdnFetcher{}
-	fetcher.fetchGcore()
+	fetcher.FetchGcore()
 }
 
 func TestFetchCfoudfront(t *testing.T) {
 	fetcher := CdnFetcher{}
-	fetcher.fetchCloudfront()
+	fetcher.FetchCloudfront()
 }

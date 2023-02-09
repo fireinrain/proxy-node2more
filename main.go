@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -8,40 +9,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"proxy-node2more/config"
+	"proxy-node2more/utils"
+	"strconv"
 	"strings"
-)
-
-// AllConfig 配置枚举
-type AllConfig struct {
-	//输入的节点切片
-	InputNodeList []string
-	//cdn提供商
-	CDNName CdnProvider
-	//获取方式
-	GetMethodName GetMethod
-	//获取的节点数
-	WantedNodeNum int
-
-	//输出的节点切片
-	OutPutNodeList []string
-}
-
-// CdnProvider cdn提供商枚举
-type CdnProvider int
-
-const (
-	CDNCloudflare CdnProvider = iota
-	CDNCloudFront
-	CDNGcore
-	CDNOther
-)
-
-// GetMethod 获取方式
-type GetMethod int
-
-const (
-	GetMethodSequance GetMethod = iota
-	GetMethodRandom
 )
 
 func main() {
@@ -54,9 +25,10 @@ func main() {
 	window := app.NewWindow("CDN节点快速提取替换工具")
 	window.Resize(fyne.NewSize(875, 590))
 	//全局配置
-	var globalConfig = AllConfig{
-		InputNodeList:  nil,
+	var globalConfig = config.AllConfig{
+		InputNodeStr:   "",
 		CDNName:        0,
+		CustomCDNIp:    nil,
 		GetMethodName:  0,
 		WantedNodeNum:  100,
 		OutPutNodeList: nil,
@@ -64,8 +36,9 @@ func main() {
 
 	//输入节点
 	nodeinput := widget.NewMultiLineEntry()
-	nodeinput.SetPlaceHolder("请输入Vmess/Trojan节点(可多行)...")
+	nodeinput.SetPlaceHolder("请输入Vmess/Trojan/Vless节点分享链接...")
 	nodeinput.SetMinRowsVisible(8)
+
 	inputNodeLabel := widget.NewLabel("原始节点: ")
 	inputNodeLabel.Resize(fyne.NewSize(400, 400))
 	inputContainer := container.New(layout.NewFormLayout(), inputNodeLabel, nodeinput)
@@ -83,31 +56,31 @@ func main() {
 	cdnProviderLabel := widget.NewLabel("CDN提供商: ")
 	var cdnProvider = []string{"Cloudflare", "CloudFront", "Gcore", "自定义"}
 	cdnSelectList := widget.NewSelect(cdnProvider, func(value string) {
-		println("CDN Provider你选择了: ", value)
-		var tempValue CdnProvider = 0
+		fmt.Println("CDN Provider你选择了: ", value)
+		var tempValue config.CdnProvider = 0
 		if value == "Cloudflare" {
-			tempValue = CDNCloudflare
+			tempValue = config.CDNCloudflare
 			if !customCdnIpInput.Disabled() {
 				customCdnIpInput.Disable()
 				customIpContainer.Refresh()
 			}
 		}
 		if value == "CloudFront" {
-			tempValue = CDNCloudFront
+			tempValue = config.CDNCloudFront
 			if !customCdnIpInput.Disabled() {
 				customCdnIpInput.Disable()
 				customIpContainer.Refresh()
 			}
 		}
 		if value == "Gcore" {
-			tempValue = CDNGcore
+			tempValue = config.CDNGcore
 			if !customCdnIpInput.Disabled() {
 				customCdnIpInput.Disable()
 				customIpContainer.Refresh()
 			}
 		}
 		if value == "自定义" {
-			tempValue = CDNOther
+			tempValue = config.CDNOther
 			if customCdnIpInput.Disabled() {
 				customCdnIpInput.Enable()
 				customIpContainer.Refresh()
@@ -122,13 +95,13 @@ func main() {
 	getMethodLabel := widget.NewLabel("获取方式: ")
 	var getMethodProvider = []string{"顺序", "随机"}
 	getMethodList := widget.NewSelect(getMethodProvider, func(value string) {
-		println("你选择了: ", value)
-		var tempValue GetMethod = 0
+		fmt.Println("你选择了: ", value)
+		var tempValue config.GetMethod = 0
 		if value == "顺序" {
-			tempValue = GetMethodSequance
+			tempValue = config.GetMethodSequance
 		}
 		if value == "随机" {
-			tempValue = GetMethodRandom
+			tempValue = config.GetMethodRandom
 		}
 		globalConfig.GetMethodName = tempValue
 	})
@@ -140,16 +113,18 @@ func main() {
 	inputNodeNum.SetText("100")
 	inputNodeNum.SetMinRowsVisible(10)
 	inputNodeNum.OnChanged = func(value string) {
-		println("GetNodeNum 你输入了: ", value)
-
+		fmt.Println("GetNodeNum 你输入了: ", value)
+		number, err := strconv.Atoi(value)
+		if err != nil {
+			fmt.Println("格式输入错误: ", err.Error())
+			return
+		}
+		globalConfig.WantedNodeNum = number
 	}
 	//提交按钮
 	subButton := widget.NewButton("↓点击提取节点↓", func() {
 
 	})
-	subButton.OnTapped = func() {
-		println("提交按钮已点击")
-	}
 
 	selectContainer := container.New(layout.NewHBoxLayout(),
 		cdnProviderLabel, cdnSelectList,
@@ -168,6 +143,29 @@ func main() {
 		selectContainer,
 		outPutContainer,
 	))
+
+	subButton.OnTapped = func() {
+		text := textarea.Text
+		//清空
+		if text != "" {
+			textarea.SetText("")
+		}
+		fmt.Println("提交按钮已点击")
+		//获取输入框内容
+		var nodeInpputStr = nodeinput.Text
+		globalConfig.InputNodeStr = nodeInpputStr
+		fmt.Println(nodeInpputStr)
+		//获取cdn类型
+		nodesResult, err := utils.CaculateNodesResult(&globalConfig)
+		if err != nil {
+			fmt.Println("程序运行出错: ", err.Error())
+		}
+
+		nodeList := nodesResult.OutPutNodeList
+		resultStr := strings.Join(nodeList, "")
+		//更新界面
+		textarea.SetText(resultStr)
+	}
 
 	window.ShowAndRun()
 }

@@ -2,9 +2,7 @@ package cdn
 
 import (
 	"context"
-	"fmt"
 	"github.com/carlmjohnson/requests"
-	"proxy-node2more/utils"
 	"strings"
 	"sync"
 )
@@ -31,12 +29,12 @@ type CloudfrontApiResp struct {
 	CloudfrontRegionalEdgeIPList []string `json:"CLOUDFRONT_REGIONAL_EDGE_IP_LIST"`
 }
 
-// fetchCloudFlare
+// FetchCloudFlare
 //
 //	@Description: 获取cloudflare家的cdn ip range
 //	@receiver receiver
 //	@return CdnApiResponse
-func (receiver CdnFetcher) fetchCloudFlare() CdnApiResponse {
+func (receiver CdnFetcher) FetchCloudFlare() CdnApiResponse {
 	var apiUrl4 = "https://www.cloudflare.com/ips-v4"
 	var apiUrl6 = "https://www.cloudflare.com/ips-v6"
 	ctx := context.Background()
@@ -50,8 +48,8 @@ func (receiver CdnFetcher) fetchCloudFlare() CdnApiResponse {
 			URL(apiUrl4).
 			ToString(&data4).
 			Fetch(ctx)
-		utils.HandleError(err)
-		fmt.Printf("%v\n", data4)
+		HandleError(err)
+		// fmt.Printf("%v\n", data4)
 	}()
 
 	go func() {
@@ -60,8 +58,8 @@ func (receiver CdnFetcher) fetchCloudFlare() CdnApiResponse {
 			URL(apiUrl6).
 			ToString(&data6).
 			Fetch(ctx)
-		utils.HandleError(err)
-		fmt.Printf("%v\n", data6)
+		HandleError(err)
+		// fmt.Printf("%v\n", data6)
 	}()
 	wg.Wait()
 	splitIp4 := strings.Split(data4, "\n")
@@ -72,12 +70,12 @@ func (receiver CdnFetcher) fetchCloudFlare() CdnApiResponse {
 	}
 }
 
-// fetchGcore
+// FetchGcore
 //
 //	@Description: 获取Gcore家的cdn range
 //	@receiver receiver
 //	@return CdnApiResponse
-func (receiver CdnFetcher) fetchGcore() CdnApiResponse {
+func (receiver CdnFetcher) FetchGcore() CdnApiResponse {
 	var apiUrl = "https://api.gcorelabs.com/cdn/public-net-list"
 	ctx := context.Background()
 	var data = GcoreCdnApiResp{}
@@ -85,20 +83,20 @@ func (receiver CdnFetcher) fetchGcore() CdnApiResponse {
 		URL(apiUrl).
 		ToJSON(&data).
 		Fetch(ctx)
-	utils.HandleError(err)
-	fmt.Printf("%v\n", data)
+	HandleError(err)
+	// fmt.Printf("%v\n", data)
 	return CdnApiResponse{
 		Ipv4Range: data.Addresses,
 		Ipv6Range: data.AddressesV6,
 	}
 }
 
-// fetchCloudfront
+// FetchCloudfront
 //
 //	@Description: 获取cloudfront cdn ip range
 //	@receiver receiver
 //	@return CdnApiResponse
-func (receiver CdnFetcher) fetchCloudfront() CdnApiResponse {
+func (receiver CdnFetcher) FetchCloudfront() CdnApiResponse {
 	ctx := context.Background()
 	var apiUrl = "https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips"
 	var data = CloudfrontApiResp{}
@@ -106,11 +104,17 @@ func (receiver CdnFetcher) fetchCloudfront() CdnApiResponse {
 		URL(apiUrl).
 		ToJSON(&data).
 		Fetch(ctx)
-	utils.HandleError(err)
-	fmt.Printf("%v\n", data)
+	HandleError(err)
+	// fmt.Printf("%v\n", data)
 
 	return CdnApiResponse{
 		Ipv4Range: data.CloudfrontGlobalIPList,
 		Ipv6Range: nil,
+	}
+}
+
+func HandleError(err error) {
+	if err != nil {
+		panic("程序当前运行出错: " + err.Error())
 	}
 }

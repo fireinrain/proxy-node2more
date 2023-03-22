@@ -1,5 +1,5 @@
 vless://502d3d3a-c70c-472d-8d09-36a25991ac57@xray.wefuckgfw.tk:2083?encryption=none&security=tls&type=ws&host=&path=/4TLoIulw/#xray.wefuckgfw.tk%3A2083
-vless://85b3a84e-a939-4be0-b35c-80e8c9b0f1c8@xray.wefuckgfw.tk:2083?encryption=none&security=tls&type=ws&host=&path=/4TLoIulw/#xray.wefuckgfw.tk%3A2083
+vless://85b3a84e-a939-4be0-b35c-80e8c9b0f1c8@xray.wefuckgfw.tk:2083?encryption=none&security=tls&type=ws&path=/4TLoIulw/#xray.wefuckgfw.tk%3A2083
 
 trojan://BQXJHGqe@trojan.wefuckgfw.tk:443#trojan.wefuckgfw.tk%3A443
 trojan://xXTKSkHo@trojan.wefuckgfw.tk:443#trojan.wefuckgfw.tk%3A443

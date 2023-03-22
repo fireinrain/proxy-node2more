@@ -264,39 +264,87 @@ func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
 	//vless协议
 	if strings.HasPrefix(sampleNode, vlessPre) {
 		//vless:  vless://9bc0eacc-68f3-4562-15bedad6f6ef@a.b.c:539?type=tcp&security=tls&sni=b.a.tk&flow=xtls-rprx-direct#abc-vless-1
+		//vless://85b3a84e-a939-4be0-b35c-80e8c9b0f1c8@xray.wefuckgfw.tk:2083?encryption=none&security=tls&type=ws&host=&path=/4TLoIulw/#xray.wefuckgfw.tk%3A2083
 		re := regexp.MustCompile(`@(.*?):`)
+
 		nodeHost := re.FindStringSubmatch(sampleNode)[1]
 
 		if strings.Index(sampleNode, "host=") != -1 {
 			re = regexp.MustCompile(`(host=)(.*?)(&)`)
-			sampleNode = re.ReplaceAllString(sampleNode, "$1"+nodeHost+"$3")
+
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			sampleNode = re.ReplaceAllString(sampleNode, subStrPart1+nodeHost+subStrPart3)
 		} else {
-			re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
-			sampleNode = re.ReplaceAllString(sampleNode, "$1$2$3$4$5host="+nodeHost+"&")
+			var subStrPart5 string
+			if strings.Contains(sampleNode, "?") {
+				re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+				subStrPart5 = re.FindStringSubmatch(sampleNode)[5]
+
+			} else {
+				re = regexp.MustCompile(`(@)(.*?)(:)(\d+)(.*?)`)
+				subStrPart5 = re.FindStringSubmatch(sampleNode)[5] + "?"
+			}
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart2 := re.FindStringSubmatch(sampleNode)[2]
+
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+
+			subStrPart4 := re.FindStringSubmatch(sampleNode)[4]
+
+			//subStrPart5 := re.FindStringSubmatch(sampleNode)[5]
+			sampleNode = re.ReplaceAllString(sampleNode, subStrPart1+subStrPart2+subStrPart3+subStrPart4+subStrPart5+"host="+nodeHost+"&")
+
 		}
 
 		for _, ip := range ipResult {
 			re = regexp.MustCompile(`(@)(.*?)(:)`)
-			nodes = append(nodes, re.ReplaceAllString(sampleNode, "$1"+ip+"$3")+"\n")
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			nodes = append(nodes, re.ReplaceAllString(sampleNode, subStrPart1+ip+subStrPart3)+"\r")
 		}
 		return nodes, nil
 	}
 	if strings.HasPrefix(sampleNode, trojanPre) {
 		//trojan  trojan://aNbwlRsdsasdasr8N@a.b.tk:48857?type=tcp&security=tls&sni=a.b.tk&flow=xtls-rprx-direct#a.b.tk-trojan-2
 		re := regexp.MustCompile(`@(.*?):`)
+
 		nodeHost := re.FindStringSubmatch(sampleNode)[1]
 
 		if strings.Index(sampleNode, "host=") != -1 {
 			re = regexp.MustCompile(`(host=)(.*?)(&)`)
-			sampleNode = re.ReplaceAllString(sampleNode, "$1"+nodeHost+"$3")
+
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			sampleNode = re.ReplaceAllString(sampleNode, subStrPart1+nodeHost+subStrPart3)
 		} else {
-			re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
-			sampleNode = re.ReplaceAllString(sampleNode, "$1$2$3$4$5host="+nodeHost+"&")
+			//是否有额外参数
+			var subStrPart5 string
+			if strings.Contains(sampleNode, "?") {
+				re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+				subStrPart5 = re.FindStringSubmatch(sampleNode)[5]
+
+			} else {
+				re = regexp.MustCompile(`(@)(.*?)(:)(\d+)(.*?)`)
+				subStrPart5 = re.FindStringSubmatch(sampleNode)[5] + "?"
+
+			}
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart2 := re.FindStringSubmatch(sampleNode)[2]
+
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+
+			subStrPart4 := re.FindStringSubmatch(sampleNode)[4]
+			//subStrPart5 := re.FindStringSubmatch(sampleNode)[5]
+
+			sampleNode = re.ReplaceAllString(sampleNode, subStrPart1+subStrPart2+subStrPart3+subStrPart4+subStrPart5+"host="+nodeHost+"&")
 		}
 
 		for _, ip := range ipResult {
 			re = regexp.MustCompile(`(@)(.*?)(:)`)
-			nodes = append(nodes, re.ReplaceAllString(sampleNode, "$1"+ip+"$3")+"\n")
+			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			nodes = append(nodes, re.ReplaceAllString(sampleNode, subStrPart1+ip+subStrPart3)+"\r")
 		}
 		return nodes, nil
 	}

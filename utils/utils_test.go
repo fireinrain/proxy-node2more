@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"proxy-node2more/config"
+	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -35,4 +38,38 @@ func TestCaculateNodesResult(t *testing.T) {
 	result, err := CaculateNodesResult(config)
 	HandleError(err)
 	println(result)
+}
+
+func TestTrojanLink(t *testing.T) {
+	sampleNode := "trojan://4bd8ab61-7e87-4ee6-be58-fe14fc62e6c0@ca1.trojanvh.xyz:80?security=tls&sni=ca1.trojanvh.xyz&type=tcp&headerType=none#org-org.org_Relay_-%F0%9F%87%A8%F0%9F%87%A6CA_36"
+	re := regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+	subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+	fmt.Println(subStrPart1)
+
+}
+
+func TestTrojanLink2(t *testing.T) {
+	sampleNode := "trojan://BQXJHGqe@trojan.wefuckgfw.tk:443#trojan.wefuckgfw.tk%3A443"
+	var re *regexp.Regexp
+	if strings.Contains(sampleNode, "?") {
+		re := regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+		subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+		fmt.Println(subStrPart1)
+	} else {
+		re := regexp.MustCompile(`(@)(.*?)(:)(\d+)(.*?)`)
+		subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
+		subStrPart2 := re.FindStringSubmatch(sampleNode)[2]
+		subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+		subStrPart4 := re.FindStringSubmatch(sampleNode)[4]
+		subStrPart5 := re.FindStringSubmatch(sampleNode)[5]
+
+		fmt.Println(subStrPart1)
+		fmt.Println(subStrPart2)
+		fmt.Println(subStrPart3)
+		fmt.Println(subStrPart4)
+		fmt.Println(subStrPart5)
+
+	}
+	println(re)
+
 }

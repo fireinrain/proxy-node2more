@@ -12,8 +12,12 @@ A GUI tool to help you to make your vmess/vless/trojan node to more nodes with c
 
 [nodesCatch节点测速工具](https://github.com/bulianglin/demo/blob/main/nodesCatch-V2.0.rar?raw=true)
 
+[林哥在线生成工具](https://bulianglin.com/archives/cdn.html) 截止到2023.3.20号目前无法正常使用
+
 ![image.jpg](images/img.png)
 ![image2.jpg](images/img_1.png)
+![img_2.jpg](images/img_2.png)
+林哥的在线工具无法使用，所以开发了这个小工具
 
 该程序就是替换vmess/vless/trojan中的host地址，并将host替换为给定的IP，仅此而已。
 

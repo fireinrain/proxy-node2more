@@ -23,6 +23,7 @@ A GUI tool to help you to make your vmess/vless/trojan node to more nodes with c
 
 # 使用
 在release页面下载对应平台的压缩包到本地，解压缩执行可执行文件即可。
+然后填入需要替换cdn ip的节点，就可以将1个节点生成几百几千个节点(如果你想的话)
 
 # 最后
 如果该项目有帮到您的话,star是对我最大的支持。

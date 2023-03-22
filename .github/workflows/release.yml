@@ -24,6 +24,6 @@ jobs:
           check-latest: true
       - uses: goreleaser/goreleaser-action@v4
         with:
-          args: release --clean -ldflags="-s -w -H windowsgui"
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

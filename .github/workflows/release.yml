@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-            sudo apt-get install gcc-multilib g++-multilib gcc-mingw-w64 libxinerama-dev xorg-dev mingw-w64 libx11-dev mesa-common-dev libglu1-mesa-dev && sudo add-apt-repository ppa:xapt/stable && apt-get install musl-tools x86_64-linux-musl-gcc 
+            sudo apt-get install gcc-multilib g++-multilib gcc-mingw-w64 libxinerama-dev xorg-dev
 
       - uses: actions/checkout@v3
 

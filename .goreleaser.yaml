@@ -13,15 +13,14 @@ builds:
     goarch:
       - amd64
     ldflags: -s -w -H=windowsgui
-  - id: linux
-    env:
-      - CC=x86_64-linux-musl-gcc
-      - CGO_ENABLED=1
-    goos:
-      - linux
-    goarch:
-      - amd64
-    ldflags: -s -w -H=windowsgui
+#  - id: linux
+#    env:
+#      - CGO_ENABLED=1
+#    goos:
+#      - linux
+#    goarch:
+#      - amd64
+#    ldflags: -s -w -H=windowsgui
 #  mac交叉编译复杂
 #  - id: darwin
 #    env:

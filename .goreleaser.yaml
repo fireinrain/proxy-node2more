@@ -5,7 +5,9 @@ before:
 builds:
   - id: windows
     env:
-      - CGO_ENABLED=0
+      - CC=x86_64-w64-mingw32-gcc
+      - CXX=x86_64-w64-mingw32-g++
+      - CGO_ENABLED=1
     goos:
       - windows
     goarch:

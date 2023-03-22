@@ -19,9 +19,9 @@ import (
 func main() {
 
 	app := app.New()
-	theme := &ChineseWordTheme{}
-	theme.SetFonts("./assets/font/msyh.ttf", "")
-	app.Settings().SetTheme(theme)
+	//theme := &ChineseWordTheme{}
+	//theme.SetFonts("./assets/font/msyh.ttf", "")
+	app.Settings().SetTheme(&CustomTheme{})
 
 	window := app.NewWindow("CDN节点快速提取替换工具")
 	window.Resize(fyne.NewSize(875, 590))
@@ -220,7 +220,38 @@ func main() {
 	window.ShowAndRun()
 }
 
-// ChineseWordTheme 自定义主题支持中文显示
+// CustomTheme 参考自: https://github.com/lusingander/fyne-font-example
+type CustomTheme struct{}
+
+func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	return theme.DefaultTheme().Color(name, variant)
+}
+
+func (t *CustomTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(name)
+}
+
+func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
+	return theme.DefaultTheme().Size(name)
+}
+
+func (*CustomTheme) Font(s fyne.TextStyle) fyne.Resource {
+	if s.Monospace {
+		return theme.DefaultTheme().Font(s)
+	}
+	if s.Bold {
+		if s.Italic {
+			return theme.DefaultTheme().Font(s)
+		}
+		return ResourceMsyhTtf
+	}
+	if s.Italic {
+		return theme.DefaultTheme().Font(s)
+	}
+	return ResourceMsyhTtf
+}
+
+// ChineseWordTheme 自定义主题支持中文显示 deprecated
 type ChineseWordTheme struct {
 	regular, bold, italic, boldItalic, monospace fyne.Resource
 }

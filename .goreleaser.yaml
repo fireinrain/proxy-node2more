@@ -13,7 +13,7 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -s -w -H windowsgui
+      - -H=windowsgui
   - id: linux
     env:
       - CGO_ENABLED=1
@@ -22,7 +22,7 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -s -w -H windowsgui
+      - -H=windowsgui
 #  mac交叉编译复杂
 #  - id: darwin
 #    env:

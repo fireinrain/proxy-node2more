@@ -198,7 +198,10 @@ func main() {
 				nodeInpputStr = strings.ReplaceAll(nodeInpputStr, match, "")
 			}
 		}
-
+		if nodes == nil {
+			textarea.SetText("请输入合法的节点分享链接!")
+			return
+		}
 		globalConfig.InputNodeStr = nodes
 		fmt.Println(nodeInpputStr)
 		//获取cdn类型

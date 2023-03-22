@@ -118,31 +118,10 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	var nodeNum = configSet.WantedNodeNum
 	var ipResult = []string{}
 	var giplist = []string{}
-
-	output := inputNodes[0]
-
-	output = strings.ReplaceAll(output, " ", "")
-	output = strings.ReplaceAll(output, "\t", "")
-	output = strings.ReplaceAll(output, "\n", "")
-
-	sampleNode := output
-	vmessPre := "vmess://"
-	vlessPre := "vless://"
-	trojanPre := "trojan://"
-
-	if !strings.HasPrefix(sampleNode, vmessPre) && !strings.HasPrefix(sampleNode, vlessPre) && !strings.HasPrefix(sampleNode, trojanPre) {
-		return &config.AllConfig{
-			InputNodeStr:   nil,
-			CDNName:        0,
-			GetMethodName:  0,
-			WantedNodeNum:  0,
-			OutPutNodeList: nil,
-		}, errors.New("仅支持vmess、vless和trojan的节点分享链接")
-	}
-	cdnFetcher := cdn.GlobalCdnFetcher
 	ipv4Tool := Ipv4Tool{}
-
 	//获取cloudflare
+	cdnFetcher := cdn.GlobalCdnFetcher
+
 	if configSet.CDNName == 0 {
 		cloudFlare := cdnFetcher.FetchCloudFlare()
 		giplist = cloudFlare.Ipv4Range
@@ -208,6 +187,42 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 		}
 
 	}
+	var results []string
+	for _, node := range inputNodes {
+		replaceCDNIpSet, err := DoReplaceCDNIpSet(node, ipResult)
+		if err != nil {
+			return &config.AllConfig{
+				InputNodeStr:   nil,
+				CDNName:        0,
+				GetMethodName:  0,
+				WantedNodeNum:  0,
+				OutPutNodeList: nil,
+			}, err
+		}
+		for _, n := range replaceCDNIpSet {
+			results = append(results, n)
+		}
+	}
+	configSet.OutPutNodeList = results
+	return configSet, nil
+}
+
+func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
+	output := inputNode
+
+	output = strings.ReplaceAll(output, " ", "")
+	output = strings.ReplaceAll(output, "\t", "")
+	output = strings.ReplaceAll(output, "\n", "")
+
+	sampleNode := output
+	vmessPre := "vmess://"
+	vlessPre := "vless://"
+	trojanPre := "trojan://"
+
+	if !strings.HasPrefix(sampleNode, vmessPre) && !strings.HasPrefix(sampleNode, vlessPre) && !strings.HasPrefix(sampleNode, trojanPre) {
+		return nil, errors.New("仅支持vmess、vless和trojan的节点分享链接")
+	}
+
 	//对ip列表去重
 	//reduceMap := make(map[string]int)
 	//newSlice := []string{}
@@ -244,10 +259,29 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 			s2 := btoa(s)
 			nodes = append(nodes, vmessPre+s2+"\r")
 		}
-		configSet.OutPutNodeList = nodes
-		return configSet, nil
-	} else if strings.HasPrefix(sampleNode, vlessPre) || strings.HasPrefix(sampleNode, trojanPre) {
+		return nodes, nil
+	}
+	//vless协议
+	if strings.HasPrefix(sampleNode, vlessPre) {
 		//vless:  vless://9bc0eacc-68f3-4562-15bedad6f6ef@a.b.c:539?type=tcp&security=tls&sni=b.a.tk&flow=xtls-rprx-direct#abc-vless-1
+		re := regexp.MustCompile(`@(.*?):`)
+		nodeHost := re.FindStringSubmatch(sampleNode)[1]
+
+		if strings.Index(sampleNode, "host=") != -1 {
+			re = regexp.MustCompile(`(host=)(.*?)(&)`)
+			sampleNode = re.ReplaceAllString(sampleNode, "$1"+nodeHost+"$3")
+		} else {
+			re = regexp.MustCompile(`(@)(.*?)(:)(.*?)(\?)`)
+			sampleNode = re.ReplaceAllString(sampleNode, "$1$2$3$4$5host="+nodeHost+"&")
+		}
+
+		for _, ip := range ipResult {
+			re = regexp.MustCompile(`(@)(.*?)(:)`)
+			nodes = append(nodes, re.ReplaceAllString(sampleNode, "$1"+ip+"$3")+"\n")
+		}
+		return nodes, nil
+	}
+	if strings.HasPrefix(sampleNode, trojanPre) {
 		//trojan  trojan://aNbwlRsdsasdasr8N@a.b.tk:48857?type=tcp&security=tls&sni=a.b.tk&flow=xtls-rprx-direct#a.b.tk-trojan-2
 		re := regexp.MustCompile(`@(.*?):`)
 		nodeHost := re.FindStringSubmatch(sampleNode)[1]
@@ -264,18 +298,10 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 			re = regexp.MustCompile(`(@)(.*?)(:)`)
 			nodes = append(nodes, re.ReplaceAllString(sampleNode, "$1"+ip+"$3")+"\n")
 		}
-		configSet.OutPutNodeList = nodes
-		return configSet, nil
-
+		return nodes, nil
 	}
 
-	return &config.AllConfig{
-		InputNodeStr:   nil,
-		CDNName:        0,
-		GetMethodName:  0,
-		WantedNodeNum:  0,
-		OutPutNodeList: nil,
-	}, errors.New("仅支持vmess、vless和trojan的节点分享链接")
+	return nil, errors.New("仅支持vmess、vless和trojan的节点分享链接")
 }
 
 // atob

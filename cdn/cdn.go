@@ -11,7 +11,12 @@ import (
 //
 //	CdnFetcher
 //	@Description:
-type CdnFetcher struct {
+type CdnFetcher struct{}
+
+var GlobalCdnFetcher CdnFetcher
+
+func init() {
+	GlobalCdnFetcher = CdnFetcher{}
 }
 
 type CdnApiResponse struct {

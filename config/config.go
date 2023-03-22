@@ -42,9 +42,9 @@ type VmessInfo struct {
 	V    string `json:"v"`
 	Ps   string `json:"ps"`
 	Add  string `json:"add"`
-	Port string `json:"port"`
+	Port int    `json:"port"`
 	ID   string `json:"id"`
-	Aid  string `json:"aid"`
+	Aid  int    `json:"aid"`
 	Scy  string `json:"scy"`
 	Net  string `json:"net"`
 	Type string `json:"type"`

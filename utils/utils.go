@@ -114,12 +114,14 @@ func HandleError(err error) {
 //	@return *config.AllConfig
 //	@return error
 func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error) {
-	var _ = configSet.InputNodeStr
+	var inputNodes = configSet.InputNodeStr
 	var nodeNum = configSet.WantedNodeNum
 	var ipResult = []string{}
 	var giplist = []string{}
 
-	output := strings.ReplaceAll("", " ", "")
+	output := inputNodes[0]
+
+	output = strings.ReplaceAll(output, " ", "")
 	output = strings.ReplaceAll(output, "\t", "")
 	output = strings.ReplaceAll(output, "\n", "")
 
@@ -137,7 +139,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 			OutPutNodeList: nil,
 		}, errors.New("仅支持vmess、vless和trojan的节点分享链接")
 	}
-	cdnFetcher := cdn.CdnFetcher{}
+	cdnFetcher := cdn.GlobalCdnFetcher
 	ipv4Tool := Ipv4Tool{}
 
 	//获取cloudflare
@@ -159,6 +161,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	}
 
 	//生成ip列表
+	//顺序
 	if configSet.GetMethodName == 0 {
 		for i, index := 0, 0; i < nodeNum; i, index = i+1, index+1 {
 			if len(giplist) == index {
@@ -167,30 +170,55 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 			ipMaskResult := strings.Split(giplist[index], "/")
 			mask, err := strconv.Atoi(ipMaskResult[1])
 			HandleError(err)
-			ipResult = append(ipResult, ipv4Tool.Random(ipMaskResult[0], mask))
+			//判断生成的ip是否已经存在(去重处理)
+			var randomIp string
+			for {
+			start:
+				randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
+				for _, ip := range ipResult {
+					if ip == randomIp {
+						goto start
+					}
+				}
+				break
+			}
+			ipResult = append(ipResult, randomIp)
 		}
+
 	} else {
+		//随机
 		for i := 0; i < nodeNum; i++ {
 			index := rand.Intn(len(giplist))
 			ipMaskResult := strings.Split(giplist[index], "/")
 			mask, err := strconv.Atoi(ipMaskResult[1])
 			HandleError(err)
-			ipResult = append(ipResult, ipv4Tool.Random(ipMaskResult[0], mask))
+			//判断生成的ip是否已经存在(去重处理)
+			var randomIp string
+			for {
+			start2:
+				randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
+				for _, ip := range ipResult {
+					if ip == randomIp {
+						goto start2
+					}
+				}
+				break
+			}
+			ipResult = append(ipResult, randomIp)
 		}
 
 	}
-
 	//对ip列表去重
-	reduceMap := make(map[string]int)
-	newSlice := []string{}
-
-	for _, ipnode := range ipResult {
-		if _, value := reduceMap[ipnode]; !value {
-			reduceMap[ipnode] = 0
-			newSlice = append(newSlice, ipnode)
-		}
-	}
-	ipResult = newSlice
+	//reduceMap := make(map[string]int)
+	//newSlice := []string{}
+	//
+	//for _, ipnode := range ipResult {
+	//	if _, value := reduceMap[ipnode]; !value {
+	//		reduceMap[ipnode] = 0
+	//		newSlice = append(newSlice, ipnode)
+	//	}
+	//}
+	//ipResult = newSlice
 	//将cdn ip替换到输入的节点
 
 	var nodes = []string{}
@@ -206,7 +234,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 
 		add := vmessInfo.Add
 		vmessInfo.Host = add
-		vmessInfo.Aid = ""
+		vmessInfo.Aid = 0
 		for i := 0; i < len(ipResult); i++ {
 			var newNode = vmessInfo.CloneNew()
 			newNode.Add = ipResult[i]
@@ -214,7 +242,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 			HandleError(err)
 			s := string(replacedNode)
 			s2 := btoa(s)
-			nodes = append(nodes, vmessPre+s2+"\n")
+			nodes = append(nodes, vmessPre+s2+"\r")
 		}
 		configSet.OutPutNodeList = nodes
 		return configSet, nil

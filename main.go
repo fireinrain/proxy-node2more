@@ -205,14 +205,15 @@ func main() {
 		nodesResult, err := utils.CaculateNodesResult(&globalConfig)
 		if err != nil {
 			fmt.Println("程序运行出错: ", err.Error())
+			textarea.SetText(err.Error())
+		} else {
+			nodeList := nodesResult.OutPutNodeList
+			resultStr := strings.Join(nodeList, "\n")
+			//更新界面
+			textarea.SetText(resultStr)
 		}
 
-		nodeList := nodesResult.OutPutNodeList
-		resultStr := strings.Join(nodeList, "\n")
-		//更新界面
-		textarea.SetText(resultStr)
 	}
-
 	window.ShowAndRun()
 }
 

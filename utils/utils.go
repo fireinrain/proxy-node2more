@@ -114,12 +114,12 @@ func HandleError(err error) {
 //	@return *config.AllConfig
 //	@return error
 func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error) {
-	var nodeStr = configSet.InputNodeStr
+	var _ = configSet.InputNodeStr
 	var nodeNum = configSet.WantedNodeNum
 	var ipResult = []string{}
 	var giplist = []string{}
 
-	output := strings.ReplaceAll(nodeStr, " ", "")
+	output := strings.ReplaceAll("", " ", "")
 	output = strings.ReplaceAll(output, "\t", "")
 	output = strings.ReplaceAll(output, "\n", "")
 
@@ -130,7 +130,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 
 	if !strings.HasPrefix(sampleNode, vmessPre) && !strings.HasPrefix(sampleNode, vlessPre) && !strings.HasPrefix(sampleNode, trojanPre) {
 		return &config.AllConfig{
-			InputNodeStr:   "",
+			InputNodeStr:   nil,
 			CDNName:        0,
 			GetMethodName:  0,
 			WantedNodeNum:  0,
@@ -242,7 +242,7 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	}
 
 	return &config.AllConfig{
-		InputNodeStr:   "",
+		InputNodeStr:   nil,
 		CDNName:        0,
 		GetMethodName:  0,
 		WantedNodeNum:  0,

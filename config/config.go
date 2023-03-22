@@ -3,7 +3,7 @@ package config
 // AllConfig 配置枚举
 type AllConfig struct {
 	//输入的节点切片
-	InputNodeStr string `json:"input_node_str"`
+	InputNodeStr []string `json:"input_node_str"`
 	//cdn提供商
 	CDNName CdnProvider `json:"cdn_name"`
 	//自定义cdn ip

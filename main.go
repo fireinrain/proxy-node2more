@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"proxy-node2more/config"
 	"proxy-node2more/utils"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -26,7 +27,7 @@ func main() {
 	window.Resize(fyne.NewSize(875, 590))
 	//全局配置
 	var globalConfig = config.AllConfig{
-		InputNodeStr:   "",
+		InputNodeStr:   nil,
 		CDNName:        0,
 		CustomCDNIp:    nil,
 		GetMethodName:  0,
@@ -36,7 +37,7 @@ func main() {
 
 	//输入节点
 	nodeinput := widget.NewMultiLineEntry()
-	nodeinput.SetPlaceHolder("请输入Vmess/Trojan/Vless节点分享链接...")
+	nodeinput.SetPlaceHolder("请输入Vmess/Trojan/Vless节点分享链接...\n请确保输入的节点已经套用了CDN,并且能正常使用.")
 	nodeinput.SetMinRowsVisible(8)
 
 	inputNodeLabel := widget.NewLabel("原始节点: ")
@@ -108,7 +109,7 @@ func main() {
 	getMethodList.Selected = "顺序"
 	getMethodList.Alignment = fyne.TextAlignCenter
 	//获取节点数
-	getNodeNumLabel := widget.NewLabel("获取节点数: ")
+	getNodeNumLabel := widget.NewLabel("获取节点数(一个原始节点): ")
 	inputNodeNum := widget.NewEntry()
 	inputNodeNum.SetText("100")
 	inputNodeNum.SetMinRowsVisible(10)
@@ -153,7 +154,52 @@ func main() {
 		fmt.Println("提交按钮已点击")
 		//获取输入框内容
 		var nodeInpputStr = nodeinput.Text
-		globalConfig.InputNodeStr = nodeInpputStr
+		//nodeInpputStr = strings.ReplaceAll(nodeInpputStr, " ", "")
+		//nodeInpputStr = strings.ReplaceAll(nodeInpputStr, "\t", "")
+		//nodeInpputStr = strings.ReplaceAll(nodeInpputStr, "\n", "")
+		//process nodeinputStr
+		var nodes []string
+
+		if strings.Contains(nodeInpputStr, "vmess://") {
+			pattern := "vmess://[\\w\\d\\+\\/=]+"
+			// Compile the regular expression pattern
+			regex := regexp.MustCompile(pattern)
+			// Find all the matches in the input string
+			matches := regex.FindAllString(nodeInpputStr, -1)
+			// Print the matches
+			for _, match := range matches {
+				//fmt.Printf("Match %d: %s\n", i+1, match)
+				nodes = append(nodes, match)
+				//移除
+				nodeInpputStr = strings.ReplaceAll(nodeInpputStr, match, "")
+			}
+		}
+		if strings.Contains(nodeInpputStr, "vless://") {
+			re := regexp.MustCompile(`vless://[^\s]+`)
+
+			matches := re.FindAllString(nodeInpputStr, -1)
+			// Print the matches
+			for _, match := range matches {
+				//fmt.Printf("Match %d: %s\n", i+1, match)
+				nodes = append(nodes, match)
+				//移除
+				nodeInpputStr = strings.ReplaceAll(nodeInpputStr, match, "")
+			}
+		}
+		if strings.Contains(nodeInpputStr, "trojan") {
+			//extract trojan nodes
+			re := regexp.MustCompile(`trojan://[^\s]+`)
+
+			matches := re.FindAllString(nodeInpputStr, -1)
+			for _, match := range matches {
+				//fmt.Printf("Match %d: %s\n", i+1, match)
+				nodes = append(nodes, match)
+				//移除
+				nodeInpputStr = strings.ReplaceAll(nodeInpputStr, match, "")
+			}
+		}
+
+		globalConfig.InputNodeStr = nodes
 		fmt.Println(nodeInpputStr)
 		//获取cdn类型
 		nodesResult, err := utils.CaculateNodesResult(&globalConfig)
@@ -162,7 +208,7 @@ func main() {
 		}
 
 		nodeList := nodesResult.OutPutNodeList
-		resultStr := strings.Join(nodeList, "")
+		resultStr := strings.Join(nodeList, "\n")
 		//更新界面
 		textarea.SetText(resultStr)
 	}

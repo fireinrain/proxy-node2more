@@ -205,6 +205,20 @@ func main() {
 		globalConfig.InputNodeStr = nodes
 		fmt.Println(nodeInpputStr)
 		//获取cdn类型
+
+		//自定义cdn
+		if globalConfig.CDNName == 3 {
+			customCdns := customCdnIpInput.Text
+			split := strings.Split(customCdns, "\n")
+			var resultCdnIps []string
+			for _, line := range split {
+				ip := strings.TrimSpace(line)
+				resultCdnIps = append(resultCdnIps, ip)
+			}
+			fmt.Println(customCdns)
+			globalConfig.CustomCDNIp = resultCdnIps
+		}
+
 		nodesResult, err := utils.CaculateNodesResult(&globalConfig)
 		if err != nil {
 			fmt.Println("程序运行出错: ", err.Error())

@@ -142,48 +142,58 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	//生成ip列表
 	//顺序
 	if configSet.GetMethodName == 0 {
-		for i, index := 0, 0; i < nodeNum; i, index = i+1, index+1 {
-			if len(giplist) == index {
-				index = 0
-			}
-			ipMaskResult := strings.Split(giplist[index], "/")
-			mask, err := strconv.Atoi(ipMaskResult[1])
-			HandleError(err)
-			//判断生成的ip是否已经存在(去重处理)
-			var randomIp string
-			for {
-			start:
-				randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
-				for _, ip := range ipResult {
-					if ip == randomIp {
-						goto start
-					}
+		//如果是自定义ip
+		if configSet.CDNName == 3 {
+			ipResult = giplist
+		} else {
+			for i, index := 0, 0; i < nodeNum; i, index = i+1, index+1 {
+				if len(giplist) == index {
+					index = 0
 				}
-				break
+				ipMaskResult := strings.Split(giplist[index], "/")
+				mask, err := strconv.Atoi(ipMaskResult[1])
+				HandleError(err)
+				//判断生成的ip是否已经存在(去重处理)
+				var randomIp string
+				for {
+				start:
+					randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
+					for _, ip := range ipResult {
+						if ip == randomIp {
+							goto start
+						}
+					}
+					break
+				}
+				ipResult = append(ipResult, randomIp)
 			}
-			ipResult = append(ipResult, randomIp)
+
 		}
 
 	} else {
-		//随机
-		for i := 0; i < nodeNum; i++ {
-			index := rand.Intn(len(giplist))
-			ipMaskResult := strings.Split(giplist[index], "/")
-			mask, err := strconv.Atoi(ipMaskResult[1])
-			HandleError(err)
-			//判断生成的ip是否已经存在(去重处理)
-			var randomIp string
-			for {
-			start2:
-				randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
-				for _, ip := range ipResult {
-					if ip == randomIp {
-						goto start2
+		if configSet.CDNName == 3 {
+			ipResult = giplist
+		} else {
+			//随机
+			for i := 0; i < nodeNum; i++ {
+				index := rand.Intn(len(giplist))
+				ipMaskResult := strings.Split(giplist[index], "/")
+				mask, err := strconv.Atoi(ipMaskResult[1])
+				HandleError(err)
+				//判断生成的ip是否已经存在(去重处理)
+				var randomIp string
+				for {
+				start2:
+					randomIp = ipv4Tool.Random(ipMaskResult[0], mask)
+					for _, ip := range ipResult {
+						if ip == randomIp {
+							goto start2
+						}
 					}
+					break
 				}
-				break
+				ipResult = append(ipResult, randomIp)
 			}
-			ipResult = append(ipResult, randomIp)
 		}
 
 	}

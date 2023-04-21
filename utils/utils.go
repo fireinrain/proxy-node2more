@@ -10,6 +10,7 @@ import (
 	"net/netip"
 	"proxy-node2more/cdn"
 	"proxy-node2more/config"
+	"proxy-node2more/location"
 	"regexp"
 	"strconv"
 	"strings"
@@ -197,9 +198,21 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 		}
 
 	}
+	//
+	var ipResultGeo = make(map[string]string)
+	for _, ip := range ipResult {
+		//获取位置信息
+		info, err := location.GetIpgeolocationInfo(ip)
+		if err != nil {
+			fmt.Println("Get ip geolocation info error: ", err)
+		}
+		infoShort := info.GetLocInfoShort()
+		ipResultGeo[ip] = infoShort
+	}
+
 	var results []string
 	for _, node := range inputNodes {
-		replaceCDNIpSet, err := DoReplaceCDNIpSet(node, ipResult)
+		replaceCDNIpSet, err := DoReplaceCDNIpSet(node, ipResultGeo)
 		if err != nil {
 			return &config.AllConfig{
 				InputNodeStr:   nil,
@@ -217,7 +230,11 @@ func CaculateNodesResult(configSet *config.AllConfig) (*config.AllConfig, error)
 	return configSet, nil
 }
 
-func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
+func DoReplaceCDNIpSet(inputNode string, ipResultGeo map[string]string) ([]string, error) {
+	ipResult := make([]string, 0, len(ipResultGeo))
+	for k := range ipResultGeo {
+		ipResult = append(ipResult, k)
+	}
 	output := inputNode
 
 	output = strings.ReplaceAll(output, " ", "")
@@ -262,6 +279,8 @@ func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
 		vmessInfo.Aid = 0
 		for i := 0; i < len(ipResult); i++ {
 			var newNode = vmessInfo.CloneNew()
+			locationInfo := ipResultGeo[ipResult[i]]
+			newNode.Ps = locationInfo + "@" + newNode.Ps
 			newNode.Add = ipResult[i]
 			replacedNode, err := json.Marshal(newNode)
 			HandleError(err)
@@ -311,10 +330,15 @@ func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
 			re = regexp.MustCompile(`(@)(.*?)(:)`)
 			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
 			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			nodeNameIndex := strings.LastIndex(sampleNode, "#")
+			nodeName := sampleNode[nodeNameIndex:]
+			locationInfo := ipResultGeo[ip]
+			sampleNode = strings.ReplaceAll(sampleNode, nodeName, locationInfo+"@"+nodeName)
 			nodes = append(nodes, re.ReplaceAllString(sampleNode, subStrPart1+ip+subStrPart3)+"\r")
 		}
 		return nodes, nil
 	}
+	//trojan协议
 	if strings.HasPrefix(sampleNode, trojanPre) {
 		//trojan  trojan://aNbwlRsdsasdasr8N@a.b.tk:48857?type=tcp&security=tls&sni=a.b.tk&flow=xtls-rprx-direct#a.b.tk-trojan-2
 		re := regexp.MustCompile(`@(.*?):`)
@@ -354,6 +378,10 @@ func DoReplaceCDNIpSet(inputNode string, ipResult []string) ([]string, error) {
 			re = regexp.MustCompile(`(@)(.*?)(:)`)
 			subStrPart1 := re.FindStringSubmatch(sampleNode)[1]
 			subStrPart3 := re.FindStringSubmatch(sampleNode)[3]
+			nodeNameIndex := strings.LastIndex(sampleNode, "#")
+			nodeName := sampleNode[nodeNameIndex:]
+			locationInfo := ipResultGeo[ip]
+			sampleNode = strings.ReplaceAll(sampleNode, nodeName, locationInfo+"@"+nodeName)
 			nodes = append(nodes, re.ReplaceAllString(sampleNode, subStrPart1+ip+subStrPart3)+"\r")
 		}
 		return nodes, nil

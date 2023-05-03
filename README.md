@@ -27,5 +27,15 @@ A GUI tool to help you to make your vmess/vless/trojan node to more nodes with c
 
 # 最后
 如果该项目有帮到您的话,star是对我最大的支持。
-[![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-支持-blue.svg)](https://www.jetbrains.com/?from=WxJava-weixin-java-tools)
+
+# 特别感谢Jetbrains 对本项目提供的Goland License支持
+
+# JetBrains开源许可
+
+本项目重度依赖于JetBrains™ ReSharper，感谢JetBrains s.r.o为本项目提供[开源许可证](https://www.jetbrains.com/community/opensource/#support)，如果你同样对开发充满热情并且经常使用JetBrains s.r.o的产品，你也可以尝试通过JetBrains官方渠道[申请](https://www.jetbrains.com/shop/eform/opensource)开源许可证以供核心开发者使用
+
+<figure style="width: min-content">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Goland_icon.png" width="200" height="200"/>
+    <figcaption>Copyright © 2023 JetBrains s.r.o. </br>ReSharper and the ReSharper logo are registered trademarks of JetBrains s.r.o.</figcaption>
+</figure>
 

@@ -27,3 +27,5 @@ A GUI tool to help you to make your vmess/vless/trojan node to more nodes with c
 
 # 最后
 如果该项目有帮到您的话,star是对我最大的支持。
+[![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-支持-blue.svg)](https://www.jetbrains.com/?from=WxJava-weixin-java-tools)
+

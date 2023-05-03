@@ -28,7 +28,7 @@ A GUI tool to help you to make your vmess/vless/trojan node to more nodes with c
 # 最后
 如果该项目有帮到您的话,star是对我最大的支持。
 
-# 特别感谢Jetbrains 对本项目提供的Goland License支持
+# 特别感谢Jetbrains对本项目的支持
 
 # JetBrains开源许可
 
